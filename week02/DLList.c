@@ -239,12 +239,14 @@ void DLListBefore (DLList L, char *it)
 		new->next = L->curr;
 		L->first = new;
 		L->curr = new;
+		L->nitems++;
 	}else{
 		new->prev = L->curr->prev;
 		new->next = L->curr;
 		L->curr->prev->next = new;
 		L->curr->prev = new;
 		L->curr = new;
+		L->nitems++;
 	}
 }
 
@@ -254,19 +256,27 @@ void DLListAfter (DLList L, char *it)
 {
 	assert (L != NULL);
 	DLListNode *new = newDLListNode(it);
-	assert(L != NULL);
+	assert(new != NULL);
 	DLListNode *now = L->curr;
-	if(now->next == NULL) {
+	if(L->nitems == 0){
+		L->curr = new;
+		L->first = new;
+		L->last = new;
+		L->nitems = 1;
+	}else if(now->next == NULL) {
 		now->next = new;
 		new->prev = now;
 		new->next = NULL;
 		L->curr = new;
-	}else{
+		L->last = new;
+		L->nitems++;
+	}else {
 		new->next = now->next;
 		new->prev = now;
-		now->next->prev = now;
+		now->next->prev = new;
 		now->next = new;
 		L->curr = new;
+		L->nitems++;
 	}
 }
 
@@ -279,20 +289,33 @@ void DLListDelete (DLList L)
 	assert (L != NULL);
 	DLListNode *now = L->curr;
 	if(L->last == L->first) {
+	    free(now->value);
 		free(now);
 		L->curr = NULL;
 		L->first = NULL;
 		L->last = NULL;
-	}else if (now->next == NULL && L->last == now) {
+		L->nitems = 0;
+	}else if (L->last == now && now->next == NULL) {
 		L->curr = now->prev;
+		free(now->value);
 		free(now);
 		L->curr->next = NULL;
 		L->last = L->curr;
+		L->nitems--;
+	}else if(L->first == now && now->prev == NULL) {
+		L->first = now->next;
+		free(now->value);
+		free(now);
+		L->first->prev = NULL;
+		L->curr = L->first;
+		L->nitems--;
 	}else{
 		now->prev->next = now->next;
 		now->next->prev = now->prev;
 		L->curr = now->next;
+		free(now->value);
 		free(now);
+		L->nitems--;
 	}		
 }
 
