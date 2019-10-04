@@ -287,6 +287,7 @@ void DLListAfter (DLList L, char *it)
 void DLListDelete (DLList L)
 {
 	assert (L != NULL);
+	if(L->curr == NULL)return;
 	DLListNode *now = L->curr;
 	if(L->last == L->first) {
 	    free(now->value);
