@@ -1,29 +1,116 @@
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
 #include "textbuffer.h"
 
 struct textbuffer {
-
+	int row;
+	struct textnode *first;
+	struct textnode *last;
 };
 
+typedef struct textnode {
+	char *string;
+	struct textnode *next;
+	struct textnode *prev;
+} textnode; 
 
+TB emptyTB (void) {
+	TB new = malloc(sizeof *new);
+	if (new == NULL) printf("couldn't allocate textbuffer");
+	new->row = 0;
+	new->first = new->last = NULL;
+	return new;
+}
+
+textnode *newnode (char *string) {
+	textnode *newTN = malloc(sizeof *newTN);
+	if (newTN == NULL) printf("couldn't allocate textnode");
+	newTN->next = newTN->prev = NULL;
+	newTN->string = string;
+	return newTN;
+}
+
+void insertnode(TB T, textnode *node) {
+	if(T->first == NULL){
+		T->first = T->last = node;
+	} else {
+		textnode *curr = T->last;
+		curr->next = node;
+		node->prev = curr;
+		T->last = node;
+	}
+	T->row++;
+}
 /**
  * Allocate a new textbuffer whose contents is initialised with the text
  * in the given string.
  */
-TB newTB(char *text) {
-	return NULL;
+
+void copycopycopy(char *sourse, char *really, int prev, int goal){
+	int i = 0;
+	while(prev < goal){
+		really[i] = sourse[prev];
+		i++;
+		prev++;
+	}
+	if(sourse[goal] == '\n'){
+	    really[i] = '\n';
+	}
 }
 
+void tokenise(char *text, TB T){
+	int flag = 0;
+	int move = 0;
+    while(text[move] != '\0'){
+        if(text[move] == '\n'){
+		    char *string = malloc((move - flag)*sizeof(char)+1);
+            copycopycopy(text,string,flag,move);
+		    textnode *node = newnode(string);
+		    insertnode(T, node);
+			flag = move + 1;
+		}    
+		move++;
+	}
+}
+
+
+/*
+start with a pointer to the begining of the string
+iterate character by character, looking for your delimiter
+each time you find one, you have a string from the last position of the length in difference - do what you want with that
+set the new start position to the delimiter + 1, and the go to step 2.
+*/
+
+TB newTB(char *text) {
+	// Create a empty TB
+	TB new = emptyTB();
+	if(text == NULL) return new;
+	tokenise(text,new);
+	return new;
+}
+
+void freetextnode(textnode *node) {
+	if (node == NULL) return;
+	free (node->string);
+	free (node);
+}
 /**
  * Free  the  memory occupied by the given textbuffer. It is an error to
  * access the buffer afterwards.
  */
-void releaseTB(TB tb) {
-
+void releaseTB (TB tb) {
+	if (tb == NULL){
+		printf("access the buffer after FREE");
+		exit(1);
+	}
+	textnode *curr = tb->first;
+	while (curr != NULL) {
+		textnode *next = curr->next;
+		freetextnode (curr);
+		curr = next;
+	}
+	free (tb);
 }
 
 /**
@@ -39,7 +126,7 @@ char *dumpTB(TB tb, bool showLineNumbers) {
  * Return the number of lines of the given textbuffer.
  */
 int linesTB(TB tb) {
-	return -1;
+	return tb->row;
 }
 
 /**
