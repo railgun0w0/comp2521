@@ -43,7 +43,11 @@ static void testNewTB(void) {
 	char *text2 = dumpTB(tb1, false); // Don't show line numbers
 	assert(strcmp("1ilove\n1maybe\n",text2) == 0);
 	assert(linesTB(tb1) == 2);
-	
+	TB tb2 = newTB("tb2\ntb2\ntb2\ntb2\n");
+	printf("%d111\n",linesTB(tb2));
+	mergeTB(tb1, 1, tb2);
+	printf("%d111\n",linesTB(tb2));
+	assert(linesTB(tb2) == 6);
 	free(text1);
 	free(text2);
 

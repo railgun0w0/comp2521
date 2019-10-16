@@ -222,8 +222,86 @@ void addPrefixTB(TB tb, int from, int to, char *prefix) {
  *   range.
  */
 void mergeTB(TB tb1, int pos, TB tb2) {
+	if(pos < 0 || pos > tb1->row+1){
+		fprintf(stderr,"out of range\n");
+		abort();
+	}
+	if(tb1 == tb2) return;
+	if(tb1->first == NULL && tb2->first == NULL){
+		free(tb2);
+		return;
+	}else if(tb2->first == NULL){
+		free(tb2);
+		return;
+	}else if(tb1->first == NULL && pos == 1){
+		tb1->first = tb2->first;
+		tb1->last = tb2->first;
+		tb1->row = tb2->row;
+		free(tb2);
+		return;
+	}
+	//tb1 || tb2 empty tb1&tb2
+	textnode *tb1curr = tb1->first;
+	textnode *tb2curr = tb2->first;
+	if(pos == (tb1->row + 1)){
+		while(tb2curr != NULL){
+		textnode *new = newnode(tb2curr->string);
+		insertnode(tb1,new);
+		tb2curr = tb2curr->next;
+		textnode *freenode = tb2->first;
+		while(freenode != NULL){
+		textnode *freenext = freenode->next;
+		free(freenode);
+		freenode = freenext;
+		}
+		free(tb2);
+		}
+		return;
+	}
+	while(tb1curr->line != pos){
+		tb1curr = tb1curr->next;
+	}
+	textnode *newhead = tb1curr->prev;
+	textnode *tail = tb1curr;
+	textnode *reallyend = tb1->last;
 	
 
+	while(tb2curr != NULL){
+		textnode *new = newnode(tb2curr->string);
+		insertnode(tb1,new);
+		tb2curr = tb2curr->next;
+	}
+	textnode *tb2head = reallyend->next;
+	
+	textnode *tb2end = tb1->last;
+	if(pos == 1){
+		tb1->first = tb2head;
+		tb1->last = reallyend;
+		tb2head->prev = NULL;
+		tb2end->next = tail;
+		reallyend->next = NULL;
+		tail->prev = tb2end;
+	}else{
+		tb2head->prev = newhead;
+		tb2end->next = tail;
+		newhead->next = tb2head;
+		tail->prev = tb2end;
+	}
+	textnode *curr = tb1->first;
+	curr->line = 1;
+	curr = curr->next;
+	while(curr != NULL){
+		curr->line = curr->prev->line + 1;
+		curr = curr->next;
+	}
+	tb1->row = tb1->last->line;
+	textnode *freenode = tb2->first;
+	while(freenode != NULL){
+		textnode *freenext = freenode->next;
+		free(freenode);
+		freenode = freenext;
+	}
+	free(tb2);
 }
 
 /**
@@ -237,6 +315,96 @@ void mergeTB(TB tb1, int pos, TB tb2) {
  *   range.
  */
 void pasteTB(TB tb1, int pos, TB tb2) {
+    if(pos < 0 || pos > tb1->row+1){
+		fprintf(stderr,"out of range\n");
+		abort();
+	}
+	if(tb1->first == NULL && tb2->first == NULL){
+		return;
+	}else if(tb2->first == NULL){
+		return;
+	}else if(tb1->first == NULL && pos == 1){
+		textnode *tb2curr = tb2->first;
+		while(tb2curr != NULL){
+			char *string = malloc(sizeof(char)*strlen(tb2curr->string)+1);
+			string[0] = '\0';
+			strcpy(string,tb2curr->string);
+			textnode *new = newnode(string);
+			insertnode(tb1,new);
+			tb2curr = tb2curr->next;	
+		}
+		tb1->row = tb1->last->line;
+		return;
+	}else{
+		if(pos == 1){
+			textnode *head = tb1->first;
+			textnode *tail = tb1->last;
+			textnode *tb2curr = tb2->first;
+			while(tb2curr != NULL){
+				char *string = malloc(sizeof(char)*strlen(tb2curr->string)+1);
+				string[0] = '\0';
+				strcpy(string,tb2curr->string);
+				textnode *new = newnode(string);
+				insertnode(tb1,new);
+				tb2curr = tb2curr->next;
+			}
+			textnode *copyend = tb1->last;
+			tb1->first = tail->next;
+			tb1->first->prev = NULL;
+			tb1->last = tail;
+			tb1->last->next = NULL;
+			copyend->next = head;
+			head->prev = copyend;
+			tb1->first->line = 1;
+			textnode *update = tb1->first;
+			update = update->next;
+			while(update != NULL){
+				update->line = update->prev->line + 1;
+				update = update->next;
+			}
+			tb1->row = tb1->last->line;
+			return;
+		}else if(pos == (tb1->row + 1)){
+			textnode *tb2curr = tb2->first;
+			while(tb2curr != NULL){
+				char *string = malloc(sizeof(char)*strlen(tb2curr->string)+1);
+				string[0] = '\0';
+				strcpy(string,tb2curr->string);
+				textnode *new = newnode(string);
+				insertnode(tb1,new);
+				tb2curr = tb2curr->next;	
+			}
+			tb1->row = tb1->last->line;
+			return;
+		}else{
+			textnode *tb1curr = tb1->first;
+			while(tb1curr->line != pos){
+				tb1curr = tb1curr->next;
+			}
+			textnode *tb1frontbreak = tb1curr->prev;
+			textnode *tb1backbreak = tb1curr;
+			textnode *tb2curr = tb2->first;
+			textnode *tb1bfeend = tb1->last;
+			while(tb2curr != NULL){
+				char *string = malloc(sizeof(char)*strlen(tb2curr->string)+1);
+				string[0] = '\0';
+				strcpy(string,tb2curr->string);
+				textnode *new = newnode(string);
+				insertnode(tb1,new);
+				tb2curr = tb2curr->next;	
+			}
+			tb1frontbreak->next = tb1bfeend->next;
+			tb1frontbreak->next->prev = tb1frontbreak;
+			tb1->last->next = tb1backbreak;
+			tb1backbreak->prev = tb1->last;
+			textnode *newend = tb1->last;
+			while(newend->next != NULL){
+				newend = newend->next; 
+			}
+			tb1->last = newend;
+		}
+		
+	}
 
 }
 
