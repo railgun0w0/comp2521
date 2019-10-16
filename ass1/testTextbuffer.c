@@ -15,6 +15,17 @@
 static void testNewTB(void);
 
 // TODO: Add more function prototypes
+struct textbuffer {
+	int row;
+	struct textnode *first;
+	struct textnode *last;
+};
+
+typedef struct textnode {
+	char *string;
+	struct textnode *next;
+	struct textnode *prev;
+} textnode; 
 
 
 int main(void) {
@@ -32,8 +43,10 @@ static void testNewTB(void) {
 	       "-----------------------------------------\n");
 
 	// Calling dumpTB immediately after newTB, without modifying the TB
-	TB tb1 = newTB("hello\nthankyou\n");
-	assert(linesTB(tb1) == 2);
+	TB tb1 = newTB("hello there,\nhow\nare\nthings\n");
+	//assert(linesTB(tb1) == 4);
+
+    printf("%s",tb1->first->string);
 	//char *text1 = dumpTB(tb1, false); // Don't show line numbers
 	//assert(strcmp("hello there,\nhow\nare\nthings\n", text1) == 0);
 	//free(text1);

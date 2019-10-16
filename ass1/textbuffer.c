@@ -54,9 +54,8 @@ void copycopycopy(char *sourse, char *really, int prev, int goal){
 		i++;
 		prev++;
 	}
-	if(sourse[goal] == '\n'){
-	    really[i] = '\n';
-	}
+	really[i] = '\n';
+	really[i+1] = '\0';
 }
 
 void tokenise(char *text, TB T){
@@ -64,7 +63,7 @@ void tokenise(char *text, TB T){
 	int move = 0;
     while(text[move] != '\0'){
         if(text[move] == '\n'){
-		    char *string = malloc((move - flag)*sizeof(char)+1);
+		    char *string = malloc((move - flag)*sizeof(char)+1+1);
             copycopycopy(text,string,flag,move);
 		    textnode *node = newnode(string);
 		    insertnode(T, node);
@@ -118,8 +117,59 @@ void releaseTB (TB tb) {
  * textbuffer. If showLineNumbers is true, add a prefix corresponding to
  * the line number.
  */
+
+int countsize(TB tb){
+	int size = 0;
+	textnode *curr = tb->first;
+	while(curr != NULL){
+		size += strlen(curr->string);
+		curr = curr->next;
+	}
+	return size;
+}
+
 char *dumpTB(TB tb, bool showLineNumbers) {
-	return NULL;
+	if(tb == NULL){
+		printf("textbuffer is null\n");
+		return NULL;
+	}
+	textnode *curr = tb->first;
+	char *str = NULL;
+	int count = 1;
+	int size;
+	char *number = NULL;
+	if(curr == NULL) {
+	    str = malloc(sizeof(char)); 
+	    str[0] = '\0';   
+	    return str;
+	}
+	if(showLineNumbers == true){
+		//add prefix
+		size = countsize(tb) + 3*tb->row;
+		str = (char *)malloc(sizeof(char)*size + 1);
+		memset(str, 0, sizeof(char)*size+1);
+		while(curr != NULL){
+			number = malloc(sizeof(char)*6);
+			memset(number, 0, sizeof(char)*6);
+			sprintf(number, "%d. ", count);
+			count++;
+			strcat(str,number);
+			free(number);
+			strcat(str,curr->string);
+			curr = curr->next;
+		}
+		number = NULL;
+		return str;
+	}else{
+		size = countsize(tb);
+		str = (char *)malloc(sizeof(char)*size+1);
+		memset(str, 0, sizeof(char)*size+1);
+		while(curr != NULL){
+			strcat(str,curr->string);
+			curr = curr->next;
+		}
+	}
+	return str;
 }
 
 /**
