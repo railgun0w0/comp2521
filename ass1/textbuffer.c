@@ -11,6 +11,7 @@ struct textbuffer {
 
 typedef struct textnode {
 	char *string;
+	int line;
 	struct textnode *next;
 	struct textnode *prev;
 } textnode; 
@@ -28,17 +29,20 @@ textnode *newnode (char *string) {
 	if (newTN == NULL) printf("couldn't allocate textnode");
 	newTN->next = newTN->prev = NULL;
 	newTN->string = string;
+	newTN->line = 0;
 	return newTN;
 }
 
 void insertnode(TB T, textnode *node) {
 	if(T->first == NULL){
 		T->first = T->last = node;
+		node->line = 1;
 	} else {
 		textnode *curr = T->last;
 		curr->next = node;
 		node->prev = curr;
 		T->last = node;
+		node->line = curr->line + 1;
 	}
 	T->row++;
 }
@@ -147,10 +151,9 @@ char *dumpTB(TB tb, bool showLineNumbers) {
 		//add prefix
 		size = countsize(tb) + 3*tb->row;
 		str = (char *)malloc(sizeof(char)*size + 1);
-		memset(str, 0, sizeof(char)*size+1);
+		str[0] = '\0';
 		while(curr != NULL){
-			number = malloc(sizeof(char)*6);
-			memset(number, 0, sizeof(char)*6);
+			number = malloc(sizeof(char)*4);
 			sprintf(number, "%d. ", count);
 			count++;
 			strcat(str,number);
@@ -163,7 +166,7 @@ char *dumpTB(TB tb, bool showLineNumbers) {
 	}else{
 		size = countsize(tb);
 		str = (char *)malloc(sizeof(char)*size+1);
-		memset(str, 0, sizeof(char)*size+1);
+		str[0] = '\0';
 		while(curr != NULL){
 			strcat(str,curr->string);
 			curr = curr->next;
@@ -185,7 +188,27 @@ int linesTB(TB tb) {
  *   is out of range. The first line of a textbuffer is at position 1.
  */
 void addPrefixTB(TB tb, int from, int to, char *prefix) {
-
+    if(to < from || from < 0 || to > tb->row){
+		fprintf(stderr,"out of range\n");
+		abort();
+	}
+	int size = strlen(prefix);
+	textnode *curr = tb->first;
+	while(curr->line != from){
+		curr = curr->next;
+	}
+	int start = curr->line;
+	while(start <= to){
+		//cpoy start
+		char *newstring = malloc(sizeof(char)*size + 1 + sizeof(char)*strlen(curr->string));
+		newstring[0] = '\0';
+		strcat(newstring, prefix);
+		strcat(newstring, curr->string);
+		free(curr->string);
+		curr->string = newstring;
+		curr = curr->next;
+		start++;
+	}
 }
 
 /**
@@ -199,6 +222,7 @@ void addPrefixTB(TB tb, int from, int to, char *prefix) {
  *   range.
  */
 void mergeTB(TB tb1, int pos, TB tb2) {
+	
 
 }
 
@@ -245,7 +269,47 @@ Match searchTB(TB tb, char *search) {
  *   is out of range.
  */
 void deleteTB(TB tb, int from, int to) {
-
+	if(to < from || from < 0 || to > tb->row){
+		fprintf(stderr,"out of range\n");
+		abort();
+	}
+	textnode *curr = tb->first;
+	while(curr->line != from){
+		curr = curr->next;
+	}
+	textnode *newhead = curr->prev;
+	int start = curr->line;
+	while(start <= to){
+		textnode *next = curr->next;
+		free(curr->string);
+		free(curr);
+		start++;
+		curr = next;
+	}
+	if(from == 1 && to == tb->row){
+		tb->row = 0;
+		tb->first = tb->last = NULL;
+	}else if(to == tb->row){
+		tb->last = newhead;
+		newhead->next = NULL;
+	}else if(from == 1){
+		tb->first = curr;
+		curr->line = 1;
+		curr = curr->next;
+		while(curr != NULL){
+			curr->line = curr->prev->line + 1;
+			curr = curr->next;
+		}
+		tb->row = tb->last->line;
+	}else{
+		newhead->next = curr;
+		curr->prev = newhead;
+		while(curr != NULL){
+			curr->line = curr->prev->line + 1;
+			curr = curr->next;
+		}
+		tb->row = tb->last->line;
+	}
 }
 
 /**
