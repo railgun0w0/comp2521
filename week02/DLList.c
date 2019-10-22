@@ -60,7 +60,10 @@ void freeDLList (DLList L)
 static DLListNode *newDLListNode (char *it)
 {
 	DLListNode *new = malloc (sizeof *new);
-	if (new == NULL) err (EX_OSERR, "couldn't allocate DLList node");
+	if (new == NULL) {
+		fprintf (stderr, "DLList is null\n");
+		abort();
+		}
 	new->value = strdup (it);
 	new->prev = new->next = NULL;
 	return new;

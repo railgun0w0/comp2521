@@ -86,7 +86,6 @@ TB cutTB (TB tb, int from, int to);
  * - The user is responsible for freeing the returned list.
  */
 Match searchTB (TB tb, char *search);
-
 /**
  * Remove  the  lines between 'from' and 'to' (inclusive) from the given
  * textbuffer 'tb'.
