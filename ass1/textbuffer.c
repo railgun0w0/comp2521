@@ -625,13 +625,106 @@ void deleteTB(TB tb, int from, int to) {
 	}
 }
 
+
+void replace(textnode *node,char *string){
+	int count_star = 0;
+	int count_underline = 0;
+	int count_dash = 0;
+	int i = 0;
+	int strsiz = strlen(string);
+	while(i < strsiz){
+		if(string[i] == '*'){
+			count_star++;
+		}else if(string[i] == '_'){
+			count_underline++;
+		}else if(string[i] == '#'){
+			count_dash++;
+		}
+		i++;
+	}
+	int newstrsize = 1;
+	int starpro = 0;
+	int underlinepro = 0;
+	int dashpro = 0;
+	int midstar;
+	if(count_star != 0){
+		starpro = 1;
+		if(count_star %2 == 0 ){
+			newstrsize += (count_star/2)*7;
+			midstar = count_star/2;
+		}else{
+			newstrsize += ((count_star - 1)/2)*7;
+			midstar = count_star - 1;
+		}
+	}
+	if(count_underline != 0){
+		if(count_underline %2 == 0){
+			newstrsize += (count_underline/2)*7;
+		}else{
+			newstrsize += ((count_underline-1)/2)*7;
+		}
+		underlinepro = 1;
+	}
+	if(count_dash != 0 && count_dash%2 != 0){
+		if(count_dash %2 == 1){
+			newstrsize += 9;
+		}
+		dashpro = 1;
+	}
+	newstrsize += strsiz;
+	char *newstring = malloc(sizeof(char)*newstrsize);
+	newstring[0] = '\0';
+	i = 0;
+	int move = 0;
+	int numstar = 0;
+	while(move < strsiz){
+		newstring[i] = string[move];
+		if(starpro == 1){
+			if(string[move] == '*' && string[move + 1] != '*'){
+				numstar++;
+				if(numstar < midstar){
+					newstring[i] = '\0';
+					strcat(newstring,"<b>");
+					i = i + 2;
+				}else if(numstar == midstar){
+					if(count_star%2 == 0){
+						newstring[i] = '\0';
+						strcat(newstring,"<b>");
+						i = i + 2;
+					}
+				}else{
+					newstring[i] = '\0';
+					strcat(newstring,"</b>");
+					i = i + 3;
+				}
+			}
+		}
+		if(underlinepro == 1){
+		}
+		if(dashpro == 1){
+		}
+		move++;
+		i++;
+	}
+	newstring[i] = '\0';
+	free(node->string);
+	node->string = newstring;
+}
 /**
  * Search  every  line of the given textbuffer for every occurrence of a
  * set of specified substitutions and alter them accordingly.
  * - Refer to the spec for details.
  */
 void formRichText(TB tb) {
-
+	if (tb == NULL){
+		fprintf(stderr,"tb is null\n");
+		abort();
+	}
+	textnode *new = tb->first;
+	while(new != NULL){
+		replace(new,new->string);
+		new = new->next;
+	}
 }
 
 ////////////////////////////////////////////////////////////////////////
