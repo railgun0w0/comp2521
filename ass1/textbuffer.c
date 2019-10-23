@@ -215,7 +215,7 @@ void addPrefixTB(TB tb, int from, int to, char *prefix) {
 		fprintf(stderr,"tb is null\n");
 		abort();
 	}
-    if(to < from || from < 0 || to > tb->row){
+    if(to < from || from <= 0 || to > tb->row){
 		fprintf(stderr,"out of range\n");
 		abort();
 	}
@@ -258,7 +258,6 @@ void mergeTB(TB tb1, int pos, TB tb2) {
 		abort();
 	}
 	if(tb1 == tb2) return;
-	
 	if(tb1->first == NULL && tb2->first == NULL){
 		free(tb2);
 		return;
@@ -628,80 +627,132 @@ void deleteTB(TB tb, int from, int to) {
 
 void replace(textnode *node,char *string){
 	int count_star = 0;
-	int count_underline = 0;
-	int count_dash = 0;
+	int count_under = 0;
 	int i = 0;
 	int strsiz = strlen(string);
+	int newstrsize = 0;
+	int starpro = 0;
+	int underpro = 0;
+	int usestar;
+	int useunder;
+	int starsearch;
+	int undersearch;
 	while(i < strsiz){
-		if(string[i] == '*'){
-			count_star++;
-		}else if(string[i] == '_'){
-			count_underline++;
-		}else if(string[i] == '#'){
-			count_dash++;
+		if(string[i] == '*' && string[i + 1] != '*'){
+			starsearch = i + 1;
+			while(starsearch < strsiz){
+				if(string[starsearch] == '*'){
+					count_star = count_star + 2;
+					starpro = 1;
+					break;
+				}
+				starsearch++;
+			}
+			i = starsearch + 1;
+		}
+		if(string[i] == '_' && string[i + 1] != '_'){
+			undersearch = i + 1;
+			while(undersearch < strsiz){
+				if(string[undersearch] == '_'){
+					count_under = count_under + 2;
+					underpro = 1;
+					break;
+				}
+				undersearch++;
+			}
+			i = undersearch + 1;
 		}
 		i++;
 	}
-	int newstrsize = 1;
-	int starpro = 0;
-	int underlinepro = 0;
-	int dashpro = 0;
-	int midstar;
-	if(count_star != 0){
-		starpro = 1;
+	if(starpro != 0){
 		if(count_star %2 == 0 ){
 			newstrsize += (count_star/2)*7;
-			midstar = count_star/2;
-		}else{
-			newstrsize += ((count_star - 1)/2)*7;
-			midstar = count_star - 1;
+			usestar = count_star;
 		}
 	}
-	if(count_underline != 0){
-		if(count_underline %2 == 0){
-			newstrsize += (count_underline/2)*7;
-		}else{
-			newstrsize += ((count_underline-1)/2)*7;
+	if(underpro != 0){
+		if(count_under %2 == 0 ){
+			newstrsize += (count_under/2)*7;
+			useunder = count_under;
 		}
-		underlinepro = 1;
-	}
-	if(count_dash != 0 && count_dash%2 != 0){
-		if(count_dash %2 == 1){
-			newstrsize += 9;
-		}
-		dashpro = 1;
 	}
 	newstrsize += strsiz;
-	char *newstring = malloc(sizeof(char)*newstrsize);
+	char *newstring;
+	if(string[0] == '#' && string[1] != '\0'){
+		newstring = malloc(sizeof(char)*newstrsize + 9 + 1);
+	}else{
+		newstring = malloc(sizeof(char)*newstrsize + 1);
+	}
 	newstring[0] = '\0';
 	i = 0;
 	int move = 0;
 	int numstar = 0;
+	int numunder = 0;
+	int dash = 0;
 	while(move < strsiz){
 		newstring[i] = string[move];
 		if(starpro == 1){
 			if(string[move] == '*' && string[move + 1] != '*'){
-				numstar++;
-				if(numstar < midstar){
+				if(numstar < usestar){
 					newstring[i] = '\0';
 					strcat(newstring,"<b>");
-					i = i + 2;
-				}else if(numstar == midstar){
-					if(count_star%2 == 0){
-						newstring[i] = '\0';
-						strcat(newstring,"<b>");
-						i = i + 2;
+					i = i + 3;
+					int search = move + 1;
+					while(string[search]!= '*'){
+						search++;
 					}
-				}else{
+					//printf("search pos : %d",search);
+					//printf("i value : %d",i);
+					move++;
+					//printf("move value: %d", move);
+					while(move < search){
+						newstring[i] = string[move];
+						i++;
+						move++;
+					}
 					newstring[i] = '\0';
 					strcat(newstring,"</b>");
 					i = i + 3;
+					numstar = numstar + 2;
 				}
 			}
 		}
-		if(underlinepro == 1){
+		if(underpro == 1){
+			if(string[move] == '_' && string[move + 1] != '_'){
+				if(numunder < useunder){
+					newstring[i] = '\0';
+					strcat(newstring,"<i>");
+					i = i + 3;
+					int search = move + 1;
+					while(string[search]!= '_'){
+						search++;
+					}
+					//printf("search pos : %d",search);
+					//printf("i value : %d",i);
+					move++;
+					//printf("move value: %d", move);
+					while(move < search){
+						newstring[i] = string[move];
+						i++;
+						move++;
+					}
+					newstring[i] = '\0';
+					strcat(newstring,"</i>");
+					i = i + 3;
+					numunder = numunder + 2;
+				}
+			}
 		}
-		if(dashpro == 1){
+		if(string[0] == '#' && string[1] != '\0' && dash == 0){
+			newstring[0] = '\0';
+			strcat(newstring,"<h1>");
+			dash = 1;
+			i = i + 3;
+		}
+		if(move + 1 == strsiz && dash == 1){
+			newstring[i + 1] = '\0';
+			strcat(newstring,"</h1>");
+			i = i + 5;
 		}
 		move++;
 		i++;
@@ -739,5 +790,3 @@ void undoTB(TB tb) {
 }
 
 void redoTB(TB tb) {
-
-}
