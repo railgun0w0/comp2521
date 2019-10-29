@@ -1,3 +1,5 @@
+// YangHaoyu z5223796 
+// textbuffer
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -44,12 +46,12 @@ static int countsize (TB tb);
 
 TB newTB (char *text) {
 	TB new = emptyTB();
-	if(text == NULL) {
-		fprintf(stderr,"text is null\n");
+	if (text == NULL) {
+		fprintf(stderr, "text is null\n");
 		abort();
 	}
-	if(text[0] == '\0') return new;
-	tokenise(text,new);
+	if (text[0] == '\0') return new;
+	tokenise(text, new);
 	return new;
 }
 
@@ -59,8 +61,8 @@ TB newTB (char *text) {
  * access the buffer afterwards.
  */
 void releaseTB (TB tb) {
-	if (tb == NULL){
-		fprintf(stderr,"tb is null\n");
+	if (tb == NULL) {
+		fprintf(stderr, "tb is null\n");
 		abort();
 	}
 	textnode *curr = tb->first;
@@ -81,23 +83,23 @@ void releaseTB (TB tb) {
 
 char *dumpTB(TB tb, bool showLineNumbers) {
 	if (tb == NULL) {
-		fprintf(stderr,"tb is null\n");
+		fprintf(stderr, "tb is null\n");
 		abort();
 	}
 	int numbersize;
 	textnode *curr = tb->first;
 	char *str = NULL;
 	int size;
-	if(curr == NULL) {
+	if (curr == NULL) {
 	    str = malloc(sizeof(char)); 
 	    str[0] = '\0';   
 	    return str;
 	}
-	if(showLineNumbers == true){
+	if (showLineNumbers == true) {
 		//add prefix
 		int totalnumbersize = 0;
 		int i = 1;
-		while(i <= tb->row){
+		while (i <= tb->row) {
 			char *tmp = malloc(10);
 			tmp[0] = '\0';
 			sprintf(tmp, "%d. ", i);
@@ -109,7 +111,7 @@ char *dumpTB(TB tb, bool showLineNumbers) {
 		int strsiz = countsize(tb) + totalnumbersize;
 		str = malloc(sizeof(char)*strsiz + 1);
 		str[0] = '\0';
-		while(curr != NULL){
+		while (curr != NULL) {
 			char *tmp2 = malloc(10);
 			sprintf(tmp2, "%d. ", curr->line);
 			strcat(str, tmp2);
@@ -120,7 +122,7 @@ char *dumpTB(TB tb, bool showLineNumbers) {
 		return str;
 	} else {
 		size = countsize(tb);
-		str = (char *)malloc(sizeof(char)*size+1);
+		str = (char *)malloc(sizeof(char)*size + 1);
 		str[0] = '\0';
 		while (curr != NULL) {
 			strcat(str, curr->string);
@@ -134,8 +136,8 @@ char *dumpTB(TB tb, bool showLineNumbers) {
  * Return the number of lines of the given textbuffer.
  */
 int linesTB(TB tb) {
-	if (tb == NULL){
-		fprintf(stderr,"tb is null\n");
+	if (tb == NULL) {
+		fprintf(stderr, "tb is null\n");
 		abort();
 	}
 	return tb->row;
@@ -147,29 +149,29 @@ int linesTB(TB tb) {
  *   is out of range. The first line of a textbuffer is at position 1.
  */
 void addPrefixTB(TB tb, int from, int to, char *prefix) {
-	if (tb == NULL){
-		fprintf(stderr,"tb is null\n");
+	if (tb == NULL) {
+		fprintf(stderr, "tb is null\n");
 		abort();
 	}
-    if(to < from || from < 1 || to > tb->row){
-		fprintf(stderr,"out of range\n");
+    if (to < from || from < 1 || to > tb->row) {
+		fprintf(stderr, "out of range\n");
 		abort();
 	}
-	if(prefix == NULL){
-		fprintf(stderr,"prefix is null\n");
+	if (prefix == NULL) { 
+		fprintf(stderr, "prefix is null\n");
 		abort();
 	}
-	if(prefix[0] == '\0'){
+	if (prefix[0] == '\0') {
 		return;
 	}
 
 	int size = strlen(prefix);
 	textnode *curr = tb->first;
-	while(curr->line != from){
+	while (curr->line != from) {
 		curr = curr->next;
 	}
 	int start = curr->line;
-	while(start <= to){
+	while (start <= to) {
 		//copy start
 		char *newstring = malloc(sizeof(char) * size + 1 + sizeof(char) * strlen(curr->string));
 		newstring[0] = '\0';
@@ -194,18 +196,18 @@ void addPrefixTB(TB tb, int from, int to, char *prefix) {
  */
 void mergeTB(TB tb1, int pos, TB tb2) {
 	if (tb1 == NULL || tb2 == NULL) {
-		fprintf(stderr,"tb is null\n");
+		fprintf(stderr, "tb is null\n");
 		abort();
 	}
-	if (pos <= 0 || pos > tb1->row+1){
-		fprintf(stderr,"out of range\n");
+	if (pos <= 0 || pos > tb1->row+1) {
+		fprintf(stderr, "out of range\n");
 		abort();
 	}
 	if (tb1 == tb2) return;
-	if (tb1->first == NULL && tb2->first == NULL){
+	if (tb1->first == NULL && tb2->first == NULL) {
 		free(tb2);
 		return;
-	} else if (tb1->first == NULL && pos == 1){
+	} else if (tb1->first == NULL && pos == 1) {
 		tb1->first = tb2->first;
 		tb1->last = tb2->last;
 		tb1->row = tb2->row;
@@ -213,11 +215,11 @@ void mergeTB(TB tb1, int pos, TB tb2) {
 		tb2->row = 0;
 		free(tb2);
 		return;
-	} else if (tb2->first == NULL){
+	} else if (tb2->first == NULL) {
 		free(tb2);
 		return;
 	} else {
-		if (pos == (tb1->row + 1)){
+		if (pos == (tb1->row + 1)) {
 			tb1->last->next = tb2->first;
 			tb2->first->prev = tb1->last;
 			tb2->first = NULL;
@@ -227,7 +229,7 @@ void mergeTB(TB tb1, int pos, TB tb2) {
 			updateline(tb1);
 			free(tb2);
 			return;
-		} else if (pos == 1){
+		} else if (pos == 1) {
 			tb1->first->prev = tb2->last;
 			tb2->last->next = tb1->first;
 			tb1->first = tb2->first;
@@ -239,7 +241,7 @@ void mergeTB(TB tb1, int pos, TB tb2) {
 			return;
 		} else {
 			textnode *tb1curr = tb1->first;
-			while (tb1curr->line != pos){
+			while (tb1curr->line != pos) {
 				tb1curr = tb1curr->next;
 			}
 			textnode *A = tb1curr->prev;
@@ -272,18 +274,18 @@ void mergeTB(TB tb1, int pos, TB tb2) {
  */
 void pasteTB(TB tb1, int pos, TB tb2) {
 	if (tb1 == NULL || tb2 == NULL) {
-		fprintf(stderr,"tb is null\n");
+		fprintf(stderr, "tb is null\n");
 		abort();
 	}
-    if (pos <= 0 || pos > tb1->row+1){
-		fprintf(stderr,"out of range\n");
+    if (pos <= 0 || pos > tb1->row+1) {
+		fprintf(stderr, "out of range\n");
 		abort();
 	}
-	if (tb1->first == NULL && tb2->first == NULL){
+	if (tb1->first == NULL && tb2->first == NULL) {
 		return;
-	} else if (tb1->first == NULL && pos == 1){
+	} else if (tb1->first == NULL && pos == 1) {
 		textnode *tb2curr = tb2->first;
-		while(tb2curr != NULL){
+		while (tb2curr != NULL) {
 			char *string = malloc(sizeof(char)*strlen(tb2curr->string)+1);
 			string[0] = '\0';
 			strcpy(string,tb2curr->string);
@@ -293,14 +295,14 @@ void pasteTB(TB tb1, int pos, TB tb2) {
 		}
 		updateline(tb1);
 		return;
-	} else if (tb2->first == NULL){
+	} else if (tb2->first == NULL) {
 		return;
 	} else {
-		if (pos == 1){
+		if (pos == 1) {
 			textnode *C = tb1->first;
 			textnode *D = tb1->last;
 			textnode *tb2curr = tb2->first;
-			while(tb2curr != NULL){
+			while (tb2curr != NULL) {
 				char *string = malloc(sizeof(char)*strlen(tb2curr->string)+1);
 				string[0] = '\0';
 				strcpy(string,tb2curr->string);
@@ -318,9 +320,9 @@ void pasteTB(TB tb1, int pos, TB tb2) {
 			C->prev = B;
 			updateline(tb1);
 			return;
-		} else if (pos == (tb1->row + 1)){
+		} else if (pos == (tb1->row + 1)) {
 			textnode *tb2curr = tb2->first;
-			while (tb2curr != NULL){
+			while (tb2curr != NULL) {
 				char *string = malloc(sizeof(char)*strlen(tb2curr->string)+1);
 				string[0] = '\0';
 				strcpy(string,tb2curr->string);
@@ -332,14 +334,14 @@ void pasteTB(TB tb1, int pos, TB tb2) {
 			return;
 		} else {
 			textnode *tb1curr = tb1->first;
-			while (tb1curr->line != pos){
+			while (tb1curr->line != pos) {
 				tb1curr = tb1curr->next;
 			}
 			textnode *tb2curr = tb2->first;
 			textnode *A = tb1curr->prev;
 			textnode *D = tb1curr;
 			textnode *tmp = tb1->last;
-			while (tb2curr != NULL){
+			while (tb2curr != NULL) {
 				char *string = malloc(sizeof(char)*strlen(tb2curr->string)+1);
 				string[0] = '\0';
 				strcpy(string,tb2curr->string);
@@ -370,26 +372,26 @@ void pasteTB(TB tb1, int pos, TB tb2) {
  *   is out of range.
  */
 TB cutTB(TB tb, int from, int to) {
-	if (tb == NULL){
-		fprintf(stderr,"tb is null\n");
+	if (tb == NULL) {
+		fprintf(stderr, "tb is null\n");
 		abort();
 	}
-	if (to < from || from < 0 || to > tb->row){
-		fprintf(stderr,"out of range\n");
+	if (to < from || from < 0 || to > tb->row) {
+		fprintf(stderr, "out of range\n");
 		abort();
 	}
 	TB new = emptyTB();
-	if (from == 1 && to == tb->row){
+	if (from == 1 && to == tb->row) {
 		new->first = tb->first;
 		new->last = tb->last;
 		new->row = tb->row;
 		tb->first = NULL;
 		tb->last = NULL;
 		tb->last = NULL;
-	} else if (from == 1){
+	} else if (from == 1) {
 		new->first = tb->first;
 		textnode *curr = tb->first;
-		while(curr->line != to){
+		while (curr->line != to) {
 			curr = curr->next;
 		}
 		new->last = curr;
@@ -398,9 +400,9 @@ TB cutTB(TB tb, int from, int to) {
 		curr->next = NULL;
 		updateline(tb);
 		updateline(new);
-	} else if (to == tb->row){
+	} else if (to == tb->row) {
 		textnode *curr = tb->first;
-		while (curr->line != from){
+		while (curr->line != from) {
 			curr = curr->next;
 		}
 		new->first = curr;
@@ -412,12 +414,12 @@ TB cutTB(TB tb, int from, int to) {
 		updateline(new);
 	} else {
 		textnode *curr = tb->first;
-		while (curr->line != from){
+		while (curr->line != from) {
 			curr = curr->next;
 		}
 		textnode *tbprev = curr->prev;
 		textnode *newhead = curr;
-		while (curr->line != to){
+		while (curr->line != to) {
 			curr = curr->next;
 		}
 		textnode *newend = curr;
@@ -441,21 +443,21 @@ TB cutTB(TB tb, int from, int to) {
  * - The user is responsible for freeing the returned list.
  */
 Match searchTB (TB tb, char *search) {
-	if (tb == NULL){
-		fprintf(stderr,"tb is null\n");
+	if (tb == NULL) {
+		fprintf(stderr, "tb is null\n");
 		abort();
 	}
 	Match head = NULL;
 	if (search[0] == '\0') return head;
-	if (search == NULL){
-		fprintf(stderr,"searching string is NULL\n");
+	if (search == NULL) {
+		fprintf(stderr, "searching string is NULL\n");
 		abort();
 	}
 	int line;
 	textnode *curr = tb->first;
-	while (curr != NULL){
+	while (curr != NULL) {
 		line = 0;
-		while (line != -1){
+		while (line != -1) {
 			line = strpos(curr->string, search, line);
 			if (line == -1) break;
 			Match new = malloc(sizeof(*new));
@@ -485,35 +487,35 @@ Match searchTB (TB tb, char *search) {
  *   is out of range.
  */
 void deleteTB(TB tb, int from, int to) {
-	if (tb == NULL){
-		fprintf(stderr,"tb is null\n");
+	if (tb == NULL) {
+		fprintf(stderr, "tb is null\n");
 		abort();
 	}
-	if (to < from || from < 0 || to > tb->row){
-		fprintf(stderr,"out of range\n");
+	if (to < from || from < 0 || to > tb->row) {
+		fprintf(stderr, "out of range\n");
 		abort();
 	}
 	textnode *curr = tb->first;
-	while (curr->line != from){
+	while (curr->line != from) {
 		curr = curr->next;
 	}
 	textnode *newhead = curr->prev;
 	int start = curr->line;
-	while (start <= to){
+	while (start <= to) {
 		textnode *next = curr->next;
 		free(curr->string);
 		free(curr);
 		start++;
 		curr = next;
 	}
-	if (from == 1 && to == tb->row){
+	if (from == 1 && to == tb->row) {
 		tb->row = 0;
 		tb->first = tb->last = NULL;
-	} else if (to == tb->row){
+	} else if (to == tb->row) {
 		tb->last = newhead;
 		newhead->next = NULL;
 		updateline(tb);
-	} else if (from == 1){
+	} else if (from == 1) {
 		tb->first = curr;
 		updateline(tb);
 	} else {
@@ -531,12 +533,12 @@ void deleteTB(TB tb, int from, int to) {
  * - Refer to the spec for details.
  */
 void formRichText(TB tb) {
-	if (tb == NULL){
-		fprintf(stderr,"tb is null\n");
+	if (tb == NULL) {
+		fprintf(stderr, "tb is null\n");
 		abort();
 	}
 	textnode *new = tb->first;
-	while (new != NULL){
+	while (new != NULL) {
 		replace(new,new->string);
 		new = new->next;
 	}
@@ -546,8 +548,8 @@ void formRichText(TB tb) {
 // Bonus challenges
 
 char *diffTB(TB tb1, TB tb2) {
-	if (tb1 == NULL || tb2 == NULL){
-		fprintf(stderr,"tb is null\n");
+	if (tb1 == NULL || tb2 == NULL) {
+		fprintf(stderr, "tb is null\n");
 		abort();
 	}
 	return NULL;
@@ -581,7 +583,7 @@ static textnode *newnode (char *string) {
 }
 
 static void insertnode(TB T, textnode *node) {
-	if (T->first == NULL){
+	if (T->first == NULL) {
 		T->first = T->last = node;
 		node->line = 1;
 	} else {
@@ -596,7 +598,7 @@ static void insertnode(TB T, textnode *node) {
 
 static int countsize (TB tb) {
 	if (tb == NULL) {
-		fprintf(stderr,"tb is null\n");
+		fprintf(stderr, "tb is null\n");
 		abort();
 	}
 	int size = 0;
@@ -610,7 +612,7 @@ static int countsize (TB tb) {
 
 static void copycopycopy(char *source, char *really, int prev, int goal) {
 	int i = 0;
-	while (prev < goal){
+	while (prev < goal) {
 		really[i] = source[prev];
 		i++;
 		prev++;
@@ -622,9 +624,9 @@ static void copycopycopy(char *source, char *really, int prev, int goal) {
 static void tokenise(char *text, TB T) {
 	int flag = 0;
 	int move = 0;
-    while (text[move] != '\0'){
-        if (text[move] == '\n'){
-		    char *string = malloc((move - flag)*sizeof(char)+1+1);
+    while (text[move] != '\0') {
+        if (text[move] == '\n') {
+		    char *string = malloc((move - flag)*sizeof(char) + 1 + 1);
             copycopycopy(text,string,flag,move);
 		    textnode *node = newnode(string);
 		    insertnode(T, node);
@@ -637,12 +639,12 @@ static void tokenise(char *text, TB T) {
 static void updateline(TB tb){
 	tb->first->line = 1;
 	textnode *curr = tb->first->next;
-	while (curr != NULL){
+	while (curr != NULL) {
 		curr->line = curr->prev->line + 1;
 		curr = curr->next;
 	}
 	curr = tb->first;
-	while(curr ->next != NULL){
+	while (curr->next != NULL) {
 		curr = curr->next;
 	}
 	tb->last = curr;
@@ -651,20 +653,20 @@ static void updateline(TB tb){
 
 static int strpos(char *source, char *search, int pos){
 	// pos may start from 0
-	if (strstr(source,search) == NULL) return -1;
+	if (strstr(source, search) == NULL) return -1;
 	int i = pos;
 	int sourcelen = strlen(source);
 	int searchlen = strlen(search);
 	int j;
     int check;
     int count;
-	while (i < sourcelen){
+	while (i < sourcelen) {
 		j = 0;
-		if (source[i] == search[j]){
+		if (source[i] == search[j]) {
             check = i;
             count = 0;
-			while (j < searchlen){
-				if (source[i + j] == search[j]){
+			while (j < searchlen) {
+				if (source[i + j] == search[j]) {
                     count++;
                 }	
 				j++;
@@ -676,7 +678,7 @@ static int strpos(char *source, char *search, int pos){
     return -1;	
 }
 
-static void replace (textnode *node,char *string) {
+static void replace (textnode *node, char *string) {
 	int count_star = 0;
 	int count_under = 0;
 	int i = 0;
@@ -689,19 +691,19 @@ static void replace (textnode *node,char *string) {
 	int starsearch;
 	int undersearch;
 	if (string[0] == '#' && strlen(string) <= 2) return;
-	if (string[0] == '#' && string[1] != '\0'){
+	if (string[0] == '#' && string[1] != '\0') {
 		char *newstring = malloc(sizeof(char)*strsiz + 9 + 1);
 		newstring[0] = '\0';
-		strcat(newstring,"<h1>");
+		strcat(newstring, "<h1>");
 		i = i + 4;
 		int move = 1;
-		while(string[move] != '\n'){
+		while (string[move] != '\n') {
 			newstring[i] = string[move];
 			move++;
 			i++;
 		}
 		newstring[i] = '\0';
-		strcat(newstring,"</h1>");
+		strcat(newstring, "</h1>");
 		newstring[i + 5] = '\n';
 		newstring[i + 6] = '\0';
 		free(node->string);
@@ -710,24 +712,24 @@ static void replace (textnode *node,char *string) {
 	}
 	// search whether this string need to replace * or _
 	while (i < strsiz) {
-		if(string[i] == '*' && string[i + 1] != '*'){
+		if (string[i] == '*' && string[i + 1] != '*') {
 			starsearch = i + 1;
-			while(starsearch < strsiz){
-				if(string[starsearch] == '*'){
+			while (starsearch < strsiz) {
+				if (string[starsearch] == '*') {
 					count_star = count_star + 2;
 					starpro = 1;
 					break;
 				}
 				starsearch++;
 			}
-			if(starpro == 1){
+			if (starpro == 1) {
 				i = starsearch + 1;
 			}
 		}
 		if (string[i] == '_' && string[i + 1] != '_') {
 			undersearch = i + 1;
-			while(undersearch < strsiz){
-				if(string[undersearch] == '_'){
+			while (undersearch < strsiz) {
+				if (string[undersearch] == '_') {
 					count_under = count_under + 2;
 					underpro = 1;
 					break;
@@ -738,7 +740,7 @@ static void replace (textnode *node,char *string) {
 		}
 		i++;
 	}
-	if(starpro == 0 && underpro == 0) return;
+	if (starpro == 0 && underpro == 0) return;
 	if (starpro != 0) {
 		if (count_star %2 == 0 ) {
 			newstrsize += (count_star/2)*7;
@@ -761,12 +763,12 @@ static void replace (textnode *node,char *string) {
 	while (move < strsiz) {
 		newstring[i] = string[move];
 		if (string[move] == '*' && string[move + 1] != '*' && starpro == 1) {
-			if (numstar < usestar){
+			if (numstar < usestar) {
 				newstring[i] = '\0';
 				strcat(newstring, "<b>");
 				i = i + 3;
 				int search = move + 1;
-				while (string[search]!= '*') {
+				while (string[search] != '*') {
 					search++;
 				}
 				//printf("search pos : %d",search);
