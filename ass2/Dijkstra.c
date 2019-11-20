@@ -20,33 +20,28 @@ ShortestPaths dijkstra(Graph g, Vertex src){
     new.pred = malloc(new.numNodes * sizeof(PredNode *));
     new.dist = malloc(new.numNodes * sizeof(int));
     PQ quene = PQNew();
-    int visit[new.numNodes];
+    
     for(int i = 0; i < new.numNodes; i++) {
 		new.dist[i] = INFINITY;
 		new.pred[i] = NULL;
         ItemPQ item;
         item.key = i;
         item.value = new.dist[i];
-        if (i == src) {
-            new.dist[i] = 0;
-            item.value = new.dist[i];
-        }
         PQAdd(quene, item);
-        visit[i] = 0;
+
 	}
+	new.dist[src] = 0;
+	ItemPQ srcitem;
+    srcitem.key = src;
+    srcitem.value = 0;
+    PQUpdate(quene,srcitem);
     // init complete
     while(!PQIsEmpty(quene)){
         ItemPQ curr = PQDequeue(quene);
-        // curr is start point 
-        if (visit[curr.key] != 0) continue;
-        // visit this edge
-        visit[curr.key] = 1;
+        // curr is start point
+
         AdjList edgelist = GraphOutIncident(g,curr.key);
         while(edgelist != NULL){
-            if(visit[edgelist->v] == 1){
-                edgelist = edgelist->next;
-                countine;
-            }
             PredNode *node = malloc(sizeof(PredNode));
             node->v = curr.key;
             node->next = NULL;
@@ -75,13 +70,21 @@ ShortestPaths dijkstra(Graph g, Vertex src){
                     new.pred[edgelist->v] = node;
                 }
                 ItemPQ newitem;
-                newitem.key = curr.key;
+                newitem.key = edgelist->v;
                 newitem.value = length;
                 PQUpdate(quene,newitem);
             }
             edgelist = edgelist->next;
         }
     }
+    
+    for (int i = 0; i < new.numNodes; i++) {
+		if (new.dist[i] == INFINITY) {
+			new.dist[i] = 0;
+			new.pred[i] = NULL;
+		}
+	}
+	
     PQFree(quene);
     return new;
 }
