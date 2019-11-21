@@ -14,6 +14,7 @@ void freeShortestPaths(ShortestPaths sps);
 ShortestPaths dijkstra(Graph g, Vertex src){
     // Create a new empty ShortestPaths structure 
     assert(g != NULL);
+    //GraphShow(g);
     ShortestPaths new;
     new.numNodes = GraphNumVertices(g);
     new.src = src;
@@ -39,7 +40,6 @@ ShortestPaths dijkstra(Graph g, Vertex src){
     while(!PQIsEmpty(quene)){
         ItemPQ curr = PQDequeue(quene);
         // curr is start point
-
         AdjList edgelist = GraphOutIncident(g,curr.key);
         while(edgelist != NULL){
             PredNode *node = malloc(sizeof(PredNode));
@@ -90,7 +90,13 @@ ShortestPaths dijkstra(Graph g, Vertex src){
 }
 
 void showShortestPaths(ShortestPaths sps){
-
+    for(int i = 0; i < sps.numNodes;i++){
+        PredNode *curr = sps.pred[i];
+        while(curr != NULL){
+            printf("pred[%d] = %d\n",i,curr->v);
+            curr = curr->next;
+        }
+    }
     return;
 }
 
